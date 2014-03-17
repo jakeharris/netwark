@@ -2,18 +2,22 @@
 
 ## Open connection
 *Client.*
+
 How do we open a connection? We're gonna need a particular machine's IP:port pair and such.
 
 ## Send data
 *Client.*
+
 Load the file into memory and put it out via the UDP socket.
 
 ## Write received data
 *Server.*
+
 Grab data from UDP socket and write data to file.
 
 ## Send data transfer confirmation
 *Server.*
+
 Close file and send the client a confirmation of the transfer.
 
 ## Receive data transfer confirmation
