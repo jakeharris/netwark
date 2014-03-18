@@ -40,9 +40,10 @@ int main() {
   sa.sin_port = htons(port);
   memcpy((void *)&sa.sin_addr, hs.c_str(), strlen(hs.c_str()));
 
-  cout << "Server address: " << ntohl(sa.sin_addr.s_addr) << endl;
-  cout << "Port: " << ntohl(sa.sin_port) << endl;
+  cout << "Server address: " << sa.sin_addr.s_addr << endl;
+  cout << "Port: " << ntohs(sa.sin_port) << endl;
   cout << "Client address: " << ntohl(a.sin_addr.s_addr) << endl;
+  cout << "Port: " << ntohs(a.sin_port) << endl;
 
   return 0;
 }
