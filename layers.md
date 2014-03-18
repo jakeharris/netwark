@@ -60,7 +60,13 @@ Separate file data to transmit into packets of size 128B (is it bytes or was it 
 
 Take each packet and combine it back into one object.
 
-# Gremlin layer and error correction layer (3)
-*More to come.*
+# Gremlin and error correction layer (3)
+## Gremlin function
+*Client.*
 
+Take command-line input on how frequently we should drop packets or corrupt data. Then, once each packet is built and given a header, run the gremlin function on it. It should randomly determine if it should corrupt data (change at least one bit), or drop the entire packet, moving the program on to the next attempted send.
 
+## Error correction function
+*Server.*
+
+May need to be two separate functions. Should first check to see if the sequence number is as expected. If it is not, then we should send a NAK with the expected sequence number. The client should then move back a packet and resend. Then, we should check if there is a checksum discrepancy between the current data and the current checksum. If there is an error, the server should drop the packet and send a NAK back to the client. Otherwise, it should pass the packet to the reassembly function.
