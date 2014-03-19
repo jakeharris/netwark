@@ -1,5 +1,12 @@
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <string.h>
+#include <iostream>
+
 #define PORT 1153
 #define BUFSIZE 2048
+
+using namespace std;
 
 int main() {
   struct sockaddr_in a;
@@ -36,11 +43,11 @@ int main() {
   cout << "Waiting on port " << PORT << "..." << endl;
 
   for (;;) {
-    rlen = recvfrom(s, b, BUFSIZE, -, (struct sockaddr *)&ca, &calen);
+    rlen = recvfrom(s, b, BUFSIZE, 0, (struct sockaddr *)&ca, &calen);
     cout << "Received " << rlen << " bytes." << endl;
     if (rlen > 0) {
-      buf[rlen] = 0;
-      cout << "Received message: " endl << buf << endl;
+      b[rlen] = 0;
+      cout << "Received message: " << endl << b << endl;
     }
   }
 }
