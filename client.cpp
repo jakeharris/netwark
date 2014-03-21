@@ -16,8 +16,6 @@ int main(int argc, char** argv) {
   //if argv[1] doesn't exist
   //    print the usage string
 
-  cout << USAGE << endl;
-
   string hs = string("131.204.14.") + argv[1]; /* Needs to be updated? Might be a string like "tux175.engr.auburn.edu." */
   short int port = 10038; /* Can be any port within 10038-10041, inclusive. */
 
@@ -25,7 +23,9 @@ int main(int argc, char** argv) {
   struct sockaddr_in sa;
   struct hostent *h;
 
-  string m = "Hello, server world!";
+  string m = string("Hello, server world! I'm gonna talk for a long long time and see if this works. Maybe")
+      + "it'll properly tell me there are more bytes; maybe it won't. Either way I'll be proud of the work I've done."
+      + "Also, Patrick is gay.";
 
   if ((s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
     cout << "Socket creation failed. (socket s)" << endl;
