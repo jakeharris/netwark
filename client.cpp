@@ -38,10 +38,11 @@ int main(int argc, char** argv) {
   memset((char *)&sa, 0, sizeof(sa));
   sa.sin_family = AF_INET;
   sa.sin_port = htons(port);
-  if(inet_aton(hs.c_str(), &sa.sin_addr) == 0) {
-    cout << "Server address conversion failed. (host string hs, server address sa)" << endl;
-    return 0;
-  }
+  inet_pton(AF_INET, hs.c_str(), &(sa.sin_addr));
+  //if(inet_aton(hs.c_str(), &sa.sin_addr) == 0) {
+    //cout << "Server address conversion failed. (host string hs, server address sa)" << endl;
+    //return 0;
+  //}
 
   cout << endl;
 
