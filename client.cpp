@@ -5,11 +5,18 @@
 #include <stdio.h>
 #include <iostream>
 
+#define USAGE "Usage:\r\nc [tux machine number]\r\n"
+
 using namespace std;
 
 int main(int argc, char** argv) {
   
   int s = 0;
+  
+  //if argv[1] doesn't exist
+  //    print the usage string
+
+  cout << USAGE << endl;
 
   string hs = string("131.204.14.") + argv[1]; /* Needs to be updated? Might be a string like "tux175.engr.auburn.edu." */
   short int port = 10038; /* Can be any port within 10038-10041, inclusive. */
@@ -58,6 +65,6 @@ int main(int argc, char** argv) {
     cout << "Package sending failed. (socket s, server address sa, message m)" << endl;
     return 0;
   }
-  
+
   return 0;
 }
