@@ -3,10 +3,17 @@
 #include <string.h>
 #include <iostream>
 
-#define PORT 1153
+#define PORT 10038
 #define BUFSIZE 2048
+#define ACK "ACK"
+#define NAK "NAK"
 
 using namespace std;
+
+bool isvpack() {
+  // change to validate based on checksum and sequence number
+  return true;
+}
 
 int main() {
   struct sockaddr_in a;
@@ -15,6 +22,7 @@ int main() {
   int rlen;
   int s;
   unsigned char b[BUFSIZE];
+  string ack;
 
   /* Create our socket. */
   if ((s = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
@@ -48,6 +56,16 @@ int main() {
     if (rlen > 0) {
       b[rlen] = 0;
       cout << "Received message: " << endl << b << endl;
+      if(isvpack()) {
+        ack = ACK;
+      } else { 
+        ack = NAK;
+      }
+      cout << "Sending acknowledgement packet (" << ack << ")." << endl;
+      if(sendto(s, ack.c_str(), strlen(ack.c_str()), 0, (struct sockaddr *)&ca, calen) < 0) {
+        cout << "Acknowledgement failed. (socket s, acknowledgement message ack, client address ca, client address length calen)" << endl;
+        return 0;
+      }
     }
   }
 }
