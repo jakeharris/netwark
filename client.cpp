@@ -4,9 +4,11 @@
 #include <string.h>
 #include <stdio.h>
 #include <iostream>
+#include <fstream>
 
 #define USAGE "Usage:\r\nc [tux machine number]\r\n"
 #define BUFSIZE 128
+#define FILENAME "Testfile"
 
 using namespace std;
 
@@ -22,8 +24,26 @@ int main(int argc, char** argv) {
   string hs = string("131.204.14.") + argv[1]; /* Needs to be updated? Might be a string like "tux175.engr.auburn.edu." */
   short int port = 10038; /* Can be any port within 10038-10041, inclusive. */
   
-  unsigned char b[BUFSIZE];
-  
+  ifstream is (FILENAME, ifstream::binary);
+
+  unsigned char b[BUFSIZE]; 
+  char * file;
+  int length;
+
+  if(is) {
+    is.seekg(0, is.end);
+    length = is.tellg();
+    is.seekg(0, is.beg);
+
+    file = new char[length];
+
+    cout << "Reading " << length << " characters..." << endl;
+    is.read(file, length);
+
+    if(!is) cout << "File reading failed. (filename " << FILENAME << "). Only " << is.gcount() << " could be read.";
+    is.close();
+  }
+
   struct sockaddr_in a;
   struct sockaddr_in sa;
   socklen_t salen = sizeof(sa);
@@ -58,19 +78,34 @@ int main(int argc, char** argv) {
   cout << "Server address (inet mode): " << inet_ntoa(sa.sin_addr) << endl;
   cout << "Port: " << ntohs(sa.sin_port) << endl;
 
-  cout << endl;
+  cout << endl << endl;
 
-  cout << "Message: " << m << endl;
+  cout << "Creating C++ string from file data...";
 
-  cout << endl;
+  string fstr = string(file);
 
-  if(sendto(s, m.c_str(), strlen(m.c_str()), 0, (struct sockaddr *)&sa, sizeof(sa)) < 0) {
-    cout << "Package sending failed. (socket s, server address sa, message m)" << endl;
-    return 0;
-  }
+  cout << "done!" << endl;
+
+  for(int x = 0; x < length; x++) {
+    cout << "Reading packet " << x << "...";
+
+    string mstr = fstr.substr(x * 128, (x + 1) * 128);
+
+    cout << "done!" << endl;
+
+    cout << "Sending packet " << x << "...";
+
+    if(sendto(s, mstr.c_str(), strlen(mstr.c_str()), 0, (struct sockaddr *)&sa, sizeof(sa)) < 0) {
+      cout << "Package sending failed. (socket s, server address sa, message m)" << endl;
+      return 0;
+    }
   
-  recvfrom(s, b, BUFSIZE, 0, (struct sockaddr *)&sa, &salen);
-  cout << "Response: " << b << endl;
+    cout << "done!" << endl;
+
+    recvfrom(s, b, BUFSIZE, 0, (struct sockaddr *)&sa, &salen);
+    cout << "Response: " << b << endl;
+
+  }
 
   return 0;
 }
