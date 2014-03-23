@@ -1,3 +1,6 @@
+#ifndef PACKET_H
+#define PACKET_H
+
 class Packet{
   //Private variables
   private:
@@ -13,8 +16,9 @@ class Packet{
     int getSequenceNum();
     int getCheckSum();
     int getAckNack();
-    void loadDataBuffer(std::string data);
-    std::string getDataBuffer();
-    Packet(int sn, char db[126]);
+    void loadDataBuffer(char* data);
+    char* getDataBuffer();
+    Packet(int sn, const char db[126]);
     Packet(); //constructor
 };
+#endif

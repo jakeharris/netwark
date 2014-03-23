@@ -1,14 +1,12 @@
 #include "packet.h"
-
-class Packet {
-
+#include <string.h>
   //Constructor
   Packet::Packet () {
 
   }
-  Packet::Packet (int sn, char db[126]){
+  Packet::Packet (int sn, const char db[126]){
     sequenceNum = (sn + 1) % 2;
-    dataBuff = db;
+    strcpy(dataBuff, db);
   }
   //Setter Methods
   void Packet::setSequenceNum(int sn){
@@ -23,8 +21,11 @@ class Packet {
      ackNack = an;
   }
 
-  void Packet::loadDataBuffer(String data){
+  void Packet::loadDataBuffer(char* data){
     //Jakes load buffer code goes here
+  }
+  char* Packet::getDataBuffer() {
+    return dataBuff;
   }
   //Getter Methods
   int Packet::getSequenceNum(){
@@ -38,5 +39,4 @@ class Packet {
   int Packet::getAckNack(){
     return ackNack;
   }
-};
 
