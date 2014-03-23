@@ -1,27 +1,14 @@
+#include "packet.h"
 
-class Packet{
-  //Public functions and variables
-  public:
-    void setSequenceNum(int sn);
-    void setCheckSum(int cs);
-    void setAckNack(int an);
-    int getSequenceNum();
-    int getCheckSum();
-    int getAckNack();
-    void loadDataBuffer(String data);
-    String getDataBuffer();
-    Packet(); //constructor
-  };
-  //Private variables
-  private:
-    int sequenceNum;
-    int checkSum;
-    int ackNack;
-    char dataBuff[126];
-  };
+class Packet {
+
   //Constructor
-  Packet::Packet(void){
+  Packet::Packet () {
 
+  }
+  Packet::Packet (int sn, char db[126]){
+    sequenceNum = (sn + 1) % 2;
+    dataBuff = db;
   }
   //Setter Methods
   void Packet::setSequenceNum(int sn){
@@ -49,3 +36,7 @@ class Packet{
   }
 
   int Packet::getAckNack(){
+    return ackNack;
+  }
+};
+

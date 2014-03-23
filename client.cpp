@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include "packet.h"
+
 
 #define USAGE "Usage:\r\nc [tux machine number]\r\n"
 #define BUFSIZE 128
