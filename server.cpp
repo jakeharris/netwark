@@ -51,7 +51,6 @@ int main() {
 
   cout << "Waiting on port " << PORT << "..." << endl;
 
-  char * address;
 
   for (;;) {
     rlen = recvfrom(s, b, BUFSIZE, 0, (struct sockaddr *)&ca, &calen);
@@ -64,8 +63,6 @@ int main() {
       } else { 
         ack = "NAK";
       }
-      inet_ntop(AF_INET, &(ca.sin_addr), address, INET_ADDRSTRLEN);
-      cout << "Sending acknowledgement packet (" << ack << ") to address " << address << "." << endl;
       if(sendto(s, ack.c_str(), strlen(ack.c_str()), 0, (struct sockaddr *)&ca, calen) < 0) {
         cout << "Acknowledgement failed. (socket s, acknowledgement message ack, client address ca, client address length calen)" << endl;
         return 0;
