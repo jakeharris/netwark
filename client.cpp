@@ -82,8 +82,8 @@ int main(int argc, char** argv) {
 
   string fstr = string(file);
 
-  for(int x = 0; x < length / 128; x++) {
-    string mstr = fstr.substr(x * 128, (x + 1) * 128);
+  for(int x = 0; x < length / BUFSIZE; x++) {
+    string mstr = fstr.substr(x * BUFSIZE, (x + 1) * BUFSIZE);
 
     cout << "x: " << x << endl << mstr << endl << endl;
 
@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
 
     recvfrom(s, b, BUFSIZE, 0, (struct sockaddr *)&sa, &salen);
     cout << "Response: " << b << endl;
-
+    memset(b, 0, BUFSIZE);
   }
 
   return 0;

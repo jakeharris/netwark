@@ -1,5 +1,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <string.h>
 #include <iostream>
 
@@ -50,6 +51,8 @@ int main() {
 
   cout << "Waiting on port " << PORT << "..." << endl;
 
+  char * address;
+
   for (;;) {
     rlen = recvfrom(s, b, BUFSIZE, 0, (struct sockaddr *)&ca, &calen);
     cout << "Received " << rlen << " bytes." << endl;
@@ -61,7 +64,8 @@ int main() {
       } else { 
         ack = "NAK";
       }
-      cout << "Sending acknowledgement packet (" << ack << ")." << endl;
+      inet_ntop(AF_INET, &(ca.sin_addr), address, INET_ADDRSTRLEN);
+      cout << "Sending acknowledgement packet (" << ack << ") to address " << address << "." << endl;
       if(sendto(s, ack.c_str(), strlen(ack.c_str()), 0, (struct sockaddr *)&ca, calen) < 0) {
         cout << "Acknowledgement failed. (socket s, acknowledgement message ack, client address ca, client address length calen)" << endl;
         return 0;
