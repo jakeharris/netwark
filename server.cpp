@@ -4,6 +4,7 @@
 #include <string.h>
 #include <iostream>
 #include <fstream>
+#include "packet.h"
 
 #define PORT 10038
 #define BUFSIZE 128
@@ -23,8 +24,8 @@ int main() {
   socklen_t calen = sizeof(ca);
   int rlen;
   int s;
-  unsigned char b[BUFSIZE];
   string ack;
+  bool seqNum = true;
 
   /* Create our socket. */
   if ((s = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
@@ -55,13 +56,15 @@ int main() {
   ofstream file("Dumpfile");
 
   for (;;) {
-    rlen = recvfrom(s, b, BUFSIZE, 0, (struct sockaddr *)&ca, &calen);
+    Packet * p;
+    cout << "Base packet formed." << endl;
+    rlen = recvfrom(s, p, 2 * BUFSIZE, 0, (struct sockaddr *)&ca, &calen);
     cout << "Received " << rlen << " bytes." << endl;
     if (rlen > 0) {
-      cout << "Received message: " << endl << b << endl;
+      cout << "Received message: " << endl << p->getDataBuffer() << endl;
       if(isvpack()) {
         ack = "ACK";
-        file << b;
+        file << p->getDataBuffer();
       } else { 
         ack = "NAK";
       }
@@ -69,7 +72,6 @@ int main() {
         cout << "Acknowledgement failed. (socket s, acknowledgement message ack, client address ca, client address length calen)" << endl;
         return 0;
       }
-      memset(b, 0, sizeof(BUFSIZE));
     }
   }
 }
