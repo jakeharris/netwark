@@ -54,12 +54,12 @@ int main() {
     rlen = recvfrom(s, b, BUFSIZE, 0, (struct sockaddr *)&ca, &calen);
     cout << "Received " << rlen << " bytes." << endl;
     if (rlen > 0) {
-      b[rlen] = 0;
+      memset(b, 0, sizeof(BUFSIZE));
       cout << "Received message: " << endl << b << endl;
       if(isvpack()) {
-        ack = ACK;
+        ack = "ACK";
       } else { 
-        ack = NAK;
+        ack = "NAK";
       }
       cout << "Sending acknowledgement packet (" << ack << ")." << endl;
       if(sendto(s, ack.c_str(), strlen(ack.c_str()), 0, (struct sockaddr *)&ca, calen) < 0) {
