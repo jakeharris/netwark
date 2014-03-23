@@ -52,7 +52,7 @@ int main() {
 
   cout << "Waiting on port " << PORT << "..." << endl;
 
-  ofstream file("Testfile");
+  ofstream file("Dumpfile");
 
   for (;;) {
     rlen = recvfrom(s, b, BUFSIZE, 0, (struct sockaddr *)&ca, &calen);
