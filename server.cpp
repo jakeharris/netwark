@@ -3,6 +3,7 @@
 #include <arpa/inet.h>
 #include <string.h>
 #include <iostream>
+#include <fstream>
 
 #define PORT 10038
 #define BUFSIZE 128
@@ -51,15 +52,16 @@ int main() {
 
   cout << "Waiting on port " << PORT << "..." << endl;
 
+  ofstream file("Testfile");
 
   for (;;) {
     rlen = recvfrom(s, b, BUFSIZE, 0, (struct sockaddr *)&ca, &calen);
     cout << "Received " << rlen << " bytes." << endl;
     if (rlen > 0) {
-      memset(b, 0, sizeof(BUFSIZE));
       cout << "Received message: " << endl << b << endl;
       if(isvpack()) {
         ack = "ACK";
+        file << b;
       } else { 
         ack = "NAK";
       }
@@ -67,6 +69,7 @@ int main() {
         cout << "Acknowledgement failed. (socket s, acknowledgement message ack, client address ca, client address length calen)" << endl;
         return 0;
       }
+      memset(b, 0, sizeof(BUFSIZE));
     }
   }
 }

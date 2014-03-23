@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
 
   string fstr = string(file);
 
-  for(int x = 0; x < length / BUFSIZE; x++) {
+  for(int x = 0; x <= length / BUFSIZE; x++) {
     string mstr = fstr.substr(x * BUFSIZE, BUFSIZE);
 
     cout << "x: " << x << endl << mstr << endl << endl;
