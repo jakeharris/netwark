@@ -4,7 +4,7 @@
 #include <iostream>
 
 #define PORT 10038
-#define BUFSIZE 2048
+#define BUFSIZE 128
 #define ACK "ACK"
 #define NAK "NAK"
 

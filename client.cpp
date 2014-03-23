@@ -80,27 +80,17 @@ int main(int argc, char** argv) {
 
   cout << endl << endl;
 
-  cout << "Creating C++ string from file data...";
-
   string fstr = string(file);
 
-  cout << "done!" << endl;
-
-  for(int x = 0; x < length; x++) {
-    cout << "Reading packet " << x << "...";
-
+  for(int x = 0; x < length / 128; x++) {
     string mstr = fstr.substr(x * 128, (x + 1) * 128);
 
-    cout << "done!" << endl;
-
-    cout << "Sending packet " << x << "...";
+    cout << "x: " << x << endl << mstr << endl << endl;
 
     if(sendto(s, mstr.c_str(), strlen(mstr.c_str()), 0, (struct sockaddr *)&sa, sizeof(sa)) < 0) {
       cout << "Package sending failed. (socket s, server address sa, message m)" << endl;
       return 0;
     }
-  
-    cout << "done!" << endl;
 
     recvfrom(s, b, BUFSIZE, 0, (struct sockaddr *)&sa, &salen);
     cout << "Response: " << b << endl;
