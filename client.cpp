@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
     Packet p(seqNum, mstr.c_str());
     
     cout << "x: " << x << endl << p.str() << endl << endl;
-    if(gremlin(p, 1, 1) == false){
+    if(gremlin(p, 100, 100) == false){
       if(sendto(s, p.str(), BUFSIZE + 3, 0, (struct sockaddr *)&sa, sizeof(sa)) < 0) {
         cout << "Package sending failed. (socket s, server address sa, message m)" << endl;
         return 0;
