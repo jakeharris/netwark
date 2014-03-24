@@ -5,25 +5,33 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <boost/lexical_cast.hpp>
 #include "packet.h"
 
 
-#define USAGE "Usage:\r\nc [tux machine number]\r\n"
+#define USAGE "Usage:\r\nc [tux machine number] [probability of packet corruption in int form] [probability of packet loss in int form]\r\n"
 #define BUFSIZE 121
 #define FILENAME "Testfile"
 #define TEST_FILENAME "Testfile2"
 
 using namespace std;
-bool gremlin(Packet pack, int corruptProb, int lossProb);
+bool gremlin(Packet * pack, int corruptProb, int lossProb);
+
+bool seqNum;
 
 int main(int argc, char** argv) {
   
   int s = 0;
 
-  if(argc != 2) { 
+  if(argc != 4) { 
     cout << USAGE << endl;
     return 1;
   }
+
+  char * probCorruptStr = argv[2];
+  int probCorrupt = boost::lexical_cast<int>(probCorruptStr);
+  char * probLossStr = argv[3];
+  int probLoss = boost::lexical_cast<int>(probLossStr);
 
   string hs = string("131.204.14.") + argv[1]; /* Needs to be updated? Might be a string like "tux175.engr.auburn.edu." */
   short int port = 10038; /* Can be any port within 10038-10041, inclusive. */
@@ -85,40 +93,62 @@ int main(int argc, char** argv) {
   cout << endl << endl;
 
   string fstr = string(file);
-  bool seqNum = true;
 
+  cout << "File: " << endl << fstr << endl << endl;
+
+  seqNum = true;
+  bool dropPck = false;
   for(int x = 0; x <= length / BUFSIZE; x++) {
+    cout << endl;
+    cout << "=== TRANSMISSION START" << endl;
     string mstr = fstr.substr(x * BUFSIZE, BUFSIZE);
     if(x * BUFSIZE + BUFSIZE > length) {
       mstr[length - (x * BUFSIZE)] = '\0';
     }
     Packet p(seqNum, mstr.c_str());
-    
-    cout << endl << "x: " << x << endl << endl; 
-    cout << "PACKET DATA ===" << endl;
-    cout << "Seq. number: " << p.getSequenceNum() << endl;
-    cout << "Checksum: " << p.getCheckSum() << endl;
-    cout << "Data buffer: " << p.getDataBuffer() << endl;
-    cout << "Serialized string: " << p.str() << endl;
-    cout << endl;
 
-    if(gremlin(p, 100, 100) == false){
-      if(sendto(s, p.str(), BUFSIZE + 3, 0, (struct sockaddr *)&sa, sizeof(sa)) < 0) {
+    if((dropPck = gremlin(&p, probCorrupt, probLoss)) == false){
+      if(sendto(s, p.str(), BUFSIZE + 7, 0, (struct sockaddr *)&sa, sizeof(sa)) < 0) {
         cout << "Package sending failed. (socket s, server address sa, message m)" << endl;
         return 0;
       }
-    }
+    } else continue;
 
-    recvfrom(s, b, BUFSIZE, 0, (struct sockaddr *)&sa, &salen);
-    cout << "Response: " << b << endl;
+    recvfrom(s, b, BUFSIZE + 7, 0, (struct sockaddr *)&sa, &salen);
+    char * ack = new char[3];
 
-    if(b[0] == 'N') { //if NAK
+    cout << endl << "=== SERVER RESPONSE TEST" << endl;
+    cout << "Data: " << b << endl;
+    if(b[6] == '0') ack = (char *)"ACK";
+    else ack = (char *)"NAK";
+    cout << "Response: " << ack << endl;
+
+    if(ack == "NAK") { //if NAK
       /* should say: if chksm(). chksm should be a function both client and server 
        * can see and use that returns a boolean: true if the checksum "checks out" 
        * (no bytes have been tampered with). 
       */
-      if(true) x--; 
-      else x = x - 2;
+
+      char * sns = new char[2];
+      memcpy(sns, &b[0], 1);
+      sns[1] = '\0';
+
+      char * css = new char[5];
+      memcpy(css, &b[1], 5);
+      
+      char * db = new char[BUFSIZE + 1];
+      memcpy(db, &b[2], BUFSIZE);
+      db[BUFSIZE] = '\0';
+
+      cout << "Sequence number: " << sns << endl;
+      cout << "Checksum: " << css << endl;
+
+      Packet pk (0, db);
+      pk.setSequenceNum(boost::lexical_cast<int>(sns));
+      pk.setCheckSum(boost::lexical_cast<int>(css));
+
+      if(!pk.chksm()) x--; 
+      else x = (x - 2 > 0) ? x - 2 : 0;
     }
 
     memset(b, 0, BUFSIZE);
@@ -126,14 +156,22 @@ int main(int argc, char** argv) {
 
   return 0;
 }
-bool gremlin(Packet pack, int corruptProb, int lossProb){
+bool gremlin(Packet * pack, int corruptProb, int lossProb){
   bool dropPacket = false;
   int r = rand() % 100;
-  if(r <= (lossProb * 100)){
+
+  if(r <= (lossProb)){
     dropPacket = true;
+    cout << "Dropped!" << endl;
   }  
-  if(r <= (corruptProb * 100)){
-    pack.loadDataBuffer(pack.getDataBuffer() + 1);
+  else if(r <= (corruptProb)){
+    cout << "Corrupted!" << endl;
+    pack->loadDataBuffer((char*)"GREMLIN LOL");
   }
+  else seqNum = (seqNum) ? false : true; 
+  cout << "Seq. num: " << pack->getSequenceNum() << endl;
+  cout << "Checksum: " << pack->getCheckSum() << endl;
+  cout << "Message: "  << pack->getDataBuffer() << endl;
+
   return dropPacket;
 }

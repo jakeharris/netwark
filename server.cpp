@@ -9,8 +9,8 @@
 
 #define PORT 10038
 #define PAKSIZE 128
-#define ACK "ACK"
-#define NAK "NAK"
+#define ACK 0
+#define NAK 1
 
 using namespace std;
 
@@ -18,21 +18,33 @@ bool seqNum;
 
 bool isvpack(unsigned char * p) {
 
-  char * css = new char[6];
-  memcpy(css, &p[1], 5);
-  css[6] = '\0';
 
+  cout << endl << "=== IS VALID PACKET TESTING" << endl;
+
+  char * sns = new char[2];
+  memcpy(sns, &p[0], 1);
+  sns[1] = '\0';
+
+  char * css = new char[6];
+  memcpy(css, &p[1], 6);
+      
+  char * db = new char[121 + 1];
+  memcpy(db, &p[2], 121);
+  db[121] = '\0';
+
+  cout << "Seq. num: " << sns << endl;
+  cout << "Checksum: " << css << endl;
+  cout << "Message: " << db << endl;
+
+  int sn = boost::lexical_cast<int>(sns);
   int cs = boost::lexical_cast<int>(css);
 
-  char * db = new char[126];
-
-  strcpy(db, reinterpret_cast<const char *>(p)+7);
-
   Packet pk (0, db);
-  pk.setSequenceNum(0);
+  pk.setSequenceNum(sn);
 
   // change to validate based on checksum and sequence number
-  //if((bool)p[0] == seqNum) return false;
+
+  if(sn == seqNum) return false;
   if(cs != pk.generateCheckSum()) return false;
   return true;
 }
@@ -43,7 +55,7 @@ int main() {
   socklen_t calen = sizeof(ca);
   int rlen;
   int s;
-  string ack;
+  bool ack;
   seqNum = true;
 
   /* Create our socket. */
@@ -74,28 +86,48 @@ int main() {
 
   ofstream file("Dumpfile");
 
+  bool isSeqNumSet = false;
   for (;;) {
     unsigned char packet[PAKSIZE + 1];
     unsigned char dataPull[PAKSIZE - 7 + 1];
     rlen = recvfrom(s, packet, PAKSIZE, 0, (struct sockaddr *)&ca, &calen);
+    if(!isSeqNumSet) {
+      isSeqNumSet = true;
+      char * str = new char[1];
+      memcpy(str, &packet[0], 1);
+      seqNum = boost::lexical_cast<int>(str);
+    }
     for(int x = 0; x < PAKSIZE - 7; x++) {
       dataPull[x] = packet[x + 7];
     }
     dataPull[PAKSIZE - 7] = '\0';
     packet[PAKSIZE] = '\0';
-    cout << "Received " << rlen << " bytes." << endl;
     if (rlen > 0) {
-      cout << "Received message: " << endl << packet << endl;
+      char * css = new char[6];
+      memcpy(css, &packet[1], 5);
+      css[5] = '\0';
+      cout << endl << endl << "=== RECEIPT" << endl;
+      cout << "Seq. num: " << packet[0] << endl;
+      cout << "Checksum: " << css << endl;
+      cout << "Received message: " << dataPull << endl;
+      cout << "Sent response: ";
       if(isvpack(packet)) {
-        ack = "ACK";
+        ack = ACK;
+        seqNum = (seqNum) ? false : true;
         file << dataPull;
       } else { 
-        ack = "NAK";
+        ack = NAK;
       }
-      if(sendto(s, ack.c_str(), strlen(ack.c_str()), 0, (struct sockaddr *)&ca, calen) < 0) {
+      cout << ((ack == ACK) ? "ACK" : "NAK") << endl;
+      Packet p ((seqNum) ? false : true, reinterpret_cast<const char *>(dataPull));
+      p.setCheckSum(boost::lexical_cast<int>(css));
+      p.setAckNack(ack);
+
+      if(sendto(s, p.str(), PAKSIZE, 0, (struct sockaddr *)&ca, calen) < 0) {
         cout << "Acknowledgement failed. (socket s, acknowledgement message ack, client address ca, client address length calen)" << endl;
         return 0;
       }
+      delete css;
     }
   }
   file.close();
