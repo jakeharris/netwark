@@ -13,6 +13,7 @@
 #define FILENAME "Testfile"
 
 using namespace std;
+bool gremlin(Packet pack, int corruptProb, int lossProb);
 
 int main(int argc, char** argv) {
   
@@ -91,10 +92,11 @@ int main(int argc, char** argv) {
     Packet p(seqNum, mstr.c_str());
     
     cout << "x: " << x << endl << p.str() << endl << endl;
-    
-    if(sendto(s, p.str(), BUFSIZE + 3, 0, (struct sockaddr *)&sa, sizeof(sa)) < 0) {
-      cout << "Package sending failed. (socket s, server address sa, message m)" << endl;
-      return 0;
+    if(gremlin(p, 1, 1) == false){
+      if(sendto(s, p.str(), BUFSIZE + 3, 0, (struct sockaddr *)&sa, sizeof(sa)) < 0) {
+        cout << "Package sending failed. (socket s, server address sa, message m)" << endl;
+        return 0;
+      }
     }
 
     recvfrom(s, b, BUFSIZE, 0, (struct sockaddr *)&sa, &salen);
@@ -113,4 +115,15 @@ int main(int argc, char** argv) {
   }
 
   return 0;
+}
+bool gremlin(Packet pack, int corruptProb, int lossProb){
+  bool dropPacket = false;
+  int r = rand() % 100;
+  if(r <= (lossProb * 100)){
+    dropPacket = true;
+  }  
+  if(r <= (corruptProb * 100)){
+    pack.loadDataBuffer(pack.getDataBuffer() + 1);
+  }
+  return dropPacket;
 }
