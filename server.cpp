@@ -57,13 +57,17 @@ int main() {
 
   for (;;) {
     unsigned char packet[PAKSIZE];
+    unsigned char dataPull[PAKSIZE - 3]
     rlen = recvfrom(s, packet, PAKSIZE, 0, (struct sockaddr *)&ca, &calen);
+    for(int p = 0; p < 128; p++){
+      dataPull[p] = packet[p + 3];
+    }
     cout << "Received " << rlen << " bytes." << endl;
     if (rlen > 0) {
-      cout << "Received message: " << endl << packet << endl;
+      cout << "Received message: " << endl << dataPull << endl;
       if(isvpack()) {
         ack = "ACK";
-        file << packet;
+        file << dataPull;
       } else { 
         ack = "NAK";
       }
