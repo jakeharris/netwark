@@ -13,7 +13,7 @@
   Packet::Packet (int sn, const char db[126]){
     sequenceNum = (sn + 1) % 2;
     strcpy(dataBuff, db);
-    checkSum = 0;
+    checkSum = generateCheckSum();
     ackNack =0;
   }
   //Setter Methods
@@ -31,6 +31,7 @@
 
   void Packet::loadDataBuffer(char* data){
     //Jakes load buffer code goes here
+    strcpy(dataBuff, data);
   }
   char* Packet::getDataBuffer() {
     return dataBuff;

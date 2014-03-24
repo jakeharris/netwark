@@ -13,8 +13,19 @@
 
 using namespace std;
 
-bool isvpack() {
+bool seqNum;
+
+bool isvpack(unsigned char * p) {
+  Packet pk;
+  char * db;
+
+  strcat(db, reinterpret_cast<const char *>(p)+2);
+
+  pk.setSequenceNum(p[0]);
+  pk.loadDataBuffer(db);
   // change to validate based on checksum and sequence number
+  if((bool)p[0] == seqNum) return false;
+  if((int)p[1] != pk.generateCheckSum()) return false;
   return true;
 }
 
@@ -25,7 +36,7 @@ int main() {
   int rlen;
   int s;
   string ack;
-  bool seqNum = true;
+  seqNum = true;
 
   /* Create our socket. */
   if ((s = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
@@ -61,7 +72,7 @@ int main() {
     cout << "Received " << rlen << " bytes." << endl;
     if (rlen > 0) {
       cout << "Received message: " << endl << packet << endl;
-      if(isvpack()) {
+      if(isvpack(packet)) {
         ack = "ACK";
         file << packet;
       } else { 
