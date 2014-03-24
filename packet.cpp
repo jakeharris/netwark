@@ -1,12 +1,17 @@
 #include "packet.h"
 #include <string.h>
+
   //Constructor
   Packet::Packet () {
-
+	sequenceNum = 0;
+	checkSum = 0;
+	ackNack = 0;
   }
   Packet::Packet (int sn, const char db[126]){
     sequenceNum = (sn + 1) % 2;
     strcpy(dataBuff, db);
+    checkSum = 0;
+    ackNack =0;
   }
   //Setter Methods
   void Packet::setSequenceNum(int sn){
@@ -26,6 +31,14 @@
   }
   char* Packet::getDataBuffer() {
     return dataBuff;
+  }
+  //Attach header to the data array
+  char* Packet::str(char* data){
+    std::string tempStr(data);
+    std::string packetString;
+    packetString = std::to_string(sequenceNum) + std::to_string(checkSum) + std::to_string(ackNack) + tempStr;
+    std::strcpy(packet, packetString.c_str());
+    return packet;
   }
   //Getter Methods
   int Packet::getSequenceNum(){
