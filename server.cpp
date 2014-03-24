@@ -57,7 +57,7 @@ int main() {
 
   for (;;) {
     unsigned char packet[PAKSIZE];
-    unsigned char dataPull[PAKSIZE - 3]
+    unsigned char dataPull[PAKSIZE - 3];
     rlen = recvfrom(s, packet, PAKSIZE, 0, (struct sockaddr *)&ca, &calen);
     for(int p = 0; p < 128; p++){
       dataPull[p] = packet[p + 3];
