@@ -7,7 +7,7 @@
 #include "packet.h"
 
 #define PORT 10038
-#define BUFSIZE 128
+#define PAKSIZE 128
 #define ACK "ACK"
 #define NAK "NAK"
 
@@ -56,15 +56,14 @@ int main() {
   ofstream file("Dumpfile");
 
   for (;;) {
-    Packet * p;
-    cout << "Base packet formed." << endl;
-    rlen = recvfrom(s, p, 2 * BUFSIZE, 0, (struct sockaddr *)&ca, &calen);
+    unsigned char packet[PAKSIZE];
+    rlen = recvfrom(s, packet, PAKSIZE, 0, (struct sockaddr *)&ca, &calen);
     cout << "Received " << rlen << " bytes." << endl;
     if (rlen > 0) {
-      cout << "Received message: " << endl << p->getDataBuffer() << endl;
+      cout << "Received message: " << endl << packet << endl;
       if(isvpack()) {
         ack = "ACK";
-        file << p->getDataBuffer();
+        file << packet;
       } else { 
         ack = "NAK";
       }
@@ -74,4 +73,5 @@ int main() {
       }
     }
   }
+  file.close();
 }

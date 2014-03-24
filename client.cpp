@@ -9,7 +9,7 @@
 
 
 #define USAGE "Usage:\r\nc [tux machine number]\r\n"
-#define BUFSIZE 126
+#define BUFSIZE 125
 #define FILENAME "Testfile"
 
 using namespace std;
@@ -88,11 +88,11 @@ int main(int argc, char** argv) {
   for(int x = 0; x <= length / BUFSIZE; x++) {
     string mstr = fstr.substr(x * BUFSIZE, BUFSIZE);
 
-    cout << "x: " << x << endl << mstr << endl << endl;
-    
     Packet p(seqNum, mstr.c_str());
-
-    if(sendto(s, p.str(), sizeof(p.str()), 0, (struct sockaddr *)&sa, sizeof(sa)) < 0) {
+    
+    cout << "x: " << x << endl << p.str() << endl << endl;
+    
+    if(sendto(s, p.str(), BUFSIZE + 3, 0, (struct sockaddr *)&sa, sizeof(sa)) < 0) {
       cout << "Package sending failed. (socket s, server address sa, message m)" << endl;
       return 0;
     }

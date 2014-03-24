@@ -1,5 +1,8 @@
 #include "packet.h"
-#include <string.h>
+
+#include <string>
+#include <iostream>
+
 
   //Constructor
   Packet::Packet () {
@@ -36,8 +39,8 @@
   char* Packet::str(){
     std::string tempStr(dataBuff);
     std::string packetString;
-    packetString = std::to_string(sequenceNum) + std::to_string(checkSum) + std::to_string(ackNack) + tempStr;
-    std::strcpy(packet, packetString.c_str());
+    packetString = std::to_string((long long int)sequenceNum) + std::to_string((long long int)checkSum) + std::to_string((long long int)ackNack) + tempStr;
+    strcpy(packet, packetString.c_str());
     return packet;
   }
   //Getter Methods
