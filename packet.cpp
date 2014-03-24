@@ -33,8 +33,8 @@
     return dataBuff;
   }
   //Attach header to the data array
-  char* Packet::str(char* data){
-    std::string tempStr(data);
+  char* Packet::str(){
+    std::string tempStr(dataBuff);
     std::string packetString;
     packetString = std::to_string(sequenceNum) + std::to_string(checkSum) + std::to_string(ackNack) + tempStr;
     std::strcpy(packet, packetString.c_str());

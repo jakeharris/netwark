@@ -27,6 +27,6 @@ class Packet{
     char* getDataBuffer();
     Packet(int sn, const char db[126]);
     Packet(); //constructor
-    char* str(char* data);
+    char* str();
 };
 #endif
