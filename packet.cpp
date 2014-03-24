@@ -39,4 +39,19 @@
   int Packet::getAckNack(){
     return ackNack;
   }
+  bool Packet::chksm() {
+    return (checkSum) == generateCheckSum();
+  }
+  int Packet::generateCheckSum() {
+    int cs = 0;
+    if(dataBuff == NULL){
+      return -1;
+    }
 
+    for(int x = 0; x < sizeof(dataBuff); x++) {
+      cs += dataBuff[x];
+    }
+
+    if(cs > 0) return cs;
+    return -1;
+  }

@@ -16,6 +16,8 @@ class Packet{
     int getSequenceNum();
     int getCheckSum();
     int getAckNack();
+    bool chksm();
+    int generateCheckSum();
     void loadDataBuffer(char* data);
     char* getDataBuffer();
     Packet(int sn, const char db[126]);

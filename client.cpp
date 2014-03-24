@@ -92,13 +92,23 @@ int main(int argc, char** argv) {
     
     Packet p(seqNum, mstr.c_str());
 
-    if(sendto(s, &p, sizeof(&p), 0, (struct sockaddr *)&sa, sizeof(sa)) < 0) {
+    if(sendto(s, p.str(), sizeof(p.str()), 0, (struct sockaddr *)&sa, sizeof(sa)) < 0) {
       cout << "Package sending failed. (socket s, server address sa, message m)" << endl;
       return 0;
     }
 
     recvfrom(s, b, BUFSIZE, 0, (struct sockaddr *)&sa, &salen);
     cout << "Response: " << b << endl;
+
+    if(b[0] == 'N') { //if NAK
+      /* should say: if chksm(). chksm should be a function both client and server 
+       * can see and use that returns a boolean: true if the checksum "checks out" 
+       * (no bytes have been tampered with). 
+      */
+      if(true) x--; 
+      else x = x - 2;
+    }
+
     memset(b, 0, BUFSIZE);
   }
 
