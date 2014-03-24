@@ -2,15 +2,16 @@
 
 #include <string>
 #include <iostream>
-
+#include <cstdlib>
 
   //Constructor
   Packet::Packet () {
 	sequenceNum = 0;
 	checkSum = 0;
 	ackNack = 0;
+        dataBuff[121];
   }
-  Packet::Packet (int sn, const char db[126]){
+  Packet::Packet (int sn, const char db[121]){
     sequenceNum = (sn + 1) % 2;
     strcpy(dataBuff, db);
     checkSum = generateCheckSum();
@@ -40,7 +41,12 @@
   char* Packet::str(){
     std::string tempStr(dataBuff);
     std::string packetString;
-    packetString = std::to_string((long long int)sequenceNum) + std::to_string((long long int)checkSum) + std::to_string((long long int)ackNack) + tempStr;
+    std::string csStr;
+
+    csStr = std::to_string((long long int)checkSum);
+    while(csStr.length() < 5) csStr += '0';
+
+    packetString = std::to_string((long long int)sequenceNum) + csStr + std::to_string((long long int)ackNack) + tempStr;
     strcpy(packet, packetString.c_str());
     return packet;
   }
@@ -64,10 +70,16 @@
     if(dataBuff == NULL){
       return -1;
     }
-
+    
     for(int x = 0; x < sizeof(dataBuff); x++) {
+      if(dataBuff[x] == '\0') {
+        x = sizeof(dataBuff);
+        break;
+      }
       cs += dataBuff[x];
     }
+
+    if(cs <= 9999) cs *= 10;
 
     if(cs > 0) return cs;
     return -1;

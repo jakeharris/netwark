@@ -4,6 +4,7 @@
 #include <string.h>
 #include <iostream>
 #include <fstream>
+#include <boost/lexical_cast.hpp>
 #include "packet.h"
 
 #define PORT 10038
@@ -16,16 +17,23 @@ using namespace std;
 bool seqNum;
 
 bool isvpack(unsigned char * p) {
-  Packet pk;
-  char * db;
 
-  strcat(db, reinterpret_cast<const char *>(p)+2);
+  char * css = new char[6];
+  memcpy(css, &p[1], 5);
+  css[6] = '\0';
 
-  pk.setSequenceNum(p[0]);
-  pk.loadDataBuffer(db);
+  int cs = boost::lexical_cast<int>(css);
+
+  char * db = new char[126];
+
+  strcpy(db, reinterpret_cast<const char *>(p)+7);
+
+  Packet pk (0, db);
+  pk.setSequenceNum(0);
+
   // change to validate based on checksum and sequence number
-  if((bool)p[0] == seqNum) return false;
-  if((int)p[1] != pk.generateCheckSum()) return false;
+  //if((bool)p[0] == seqNum) return false;
+  if(cs != pk.generateCheckSum()) return false;
   return true;
 }
 
@@ -67,12 +75,14 @@ int main() {
   ofstream file("Dumpfile");
 
   for (;;) {
-    unsigned char packet[PAKSIZE];
-    unsigned char dataPull[PAKSIZE - 3];
+    unsigned char packet[PAKSIZE + 1];
+    unsigned char dataPull[PAKSIZE - 7 + 1];
     rlen = recvfrom(s, packet, PAKSIZE, 0, (struct sockaddr *)&ca, &calen);
-    for(int p = 0; p < 128; p++){
-      dataPull[p] = packet[p + 3];
+    for(int x = 0; x < PAKSIZE - 7; x++) {
+      dataPull[x] = packet[x + 7];
     }
+    dataPull[PAKSIZE - 7] = '\0';
+    packet[PAKSIZE] = '\0';
     cout << "Received " << rlen << " bytes." << endl;
     if (rlen > 0) {
       cout << "Received message: " << endl << packet << endl;

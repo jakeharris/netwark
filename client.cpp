@@ -9,8 +9,9 @@
 
 
 #define USAGE "Usage:\r\nc [tux machine number]\r\n"
-#define BUFSIZE 125
+#define BUFSIZE 121
 #define FILENAME "Testfile"
+#define TEST_FILENAME "Testfile2"
 
 using namespace std;
 
@@ -87,12 +88,20 @@ int main(int argc, char** argv) {
 
   for(int x = 0; x <= length / BUFSIZE; x++) {
     string mstr = fstr.substr(x * BUFSIZE, BUFSIZE);
-
+    if(x * BUFSIZE + BUFSIZE > length) {
+      mstr[length - (x * BUFSIZE)] = '\0';
+    }
     Packet p(seqNum, mstr.c_str());
     
-    cout << "x: " << x << endl << p.str() << endl << endl;
-    
-    if(sendto(s, p.str(), BUFSIZE + 3, 0, (struct sockaddr *)&sa, sizeof(sa)) < 0) {
+    cout << endl << "x: " << x << endl << endl; 
+    cout << "PACKET DATA ===" << endl;
+    cout << "Seq. number: " << p.getSequenceNum() << endl;
+    cout << "Checksum: " << p.getCheckSum() << endl;
+    cout << "Data buffer: " << p.getDataBuffer() << endl;
+    cout << "Serialized string: " << p.str() << endl;
+    cout << endl;
+
+    if(sendto(s, p.str(), 128, 0, (struct sockaddr *)&sa, sizeof(sa)) < 0) {
       cout << "Package sending failed. (socket s, server address sa, message m)" << endl;
       return 0;
     }
